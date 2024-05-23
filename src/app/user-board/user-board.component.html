@@ -1,0 +1,549 @@
+<body *ngIf="user">
+<button type="button" class="btn btn-info" (click)="refreshrecs()"*ngIf="!showreclamationseme&&!showreclamationsacq&&!showreclamationsonus&&!showreclamations&&user.usertype!='comite arbitrage'">Charger les réclamations</button>                			
+<div class="panel-heading" style="float: left;">
+  <h4 class="panel-title">
+  <a data-toggle="collapse" data-parent="#accordion"><span class="badge bg-secondary bg-secondary">{{calculaterecnumber()}}</span>Liste des réclamations</a>
+  </h4>
+</div>
+<fieldset *ngIf="showreclamationseme||showreclamationsacq||showreclamationsonus||showreclamations||user.usertype=='comite arbitrage'" style="margin-left: 20%;margin-right: 20%;">
+    <div class="card card-body"*ngIf="showsearchform"> 
+      <h5 style="text-align: center;">Critères de recherche</h5>
+      <div class="row">
+      <div class="col-md-3">
+      <input type="text" placeholder="ID commerçant" class="form-control"[(ngModel)]="option0Value">       
+      </div>
+      <div class="col-md-3">
+      <input type="text" class="form-control" placeholder="Acquéreur"[(ngModel)]="option1Value">       
+      </div>   
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="Carte"[(ngModel)]="option3Value">       
+      </div>    
+      <div class="col-md-3">
+        <input type="text" class="form-control" placeholder="ARN"[(ngModel)]="option4Value">       
+      </div> 
+      </div>
+      <div class="row">
+        <div class="col-md-3">
+        <input type="text" placeholder="Code" class="form-control"[(ngModel)]="option5Value">       
+        </div>
+        <div class="col-md-3">
+          <label for="">Statut</label>
+          <select [(ngModel)]="option7Value">
+            <option *ngFor="let stat of status" [value]="stat">{{stat}}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <input type="text" class="form-control" placeholder="Motif"[(ngModel)]="option9Value">       
+        </div> 
+        <div class="col-md-3">
+          <input type="text" class="form-control" placeholder="Id client"[(ngModel)]="option10Value">       
+        </div> 
+        </div>
+        <div class="row">
+          <div class="col-md-2"> 
+        <label for="dinf">transaction Supérieur à:</label>
+          </div>
+          <div class="col-md-4">
+          <input type="date" placeholder="supérieur à" class="form-control"[(ngModel)]="option2Value">       
+          </div>
+          <div class="col-md-2"> 
+            <label for="dinf">transaction Inférieur à:</label>
+          </div>
+          <div class="col-md-4">
+          <input type="date" class="form-control" placeholder="inférieur à"[(ngModel)]="option11Value">       
+          </div>   
+          </div>
+          <div class="row">
+            <div class="col-md-2"> 
+          <label for="dinf">création Supérieur à:</label>
+            </div>
+            <div class="col-md-4">
+            <input type="date" placeholder="supérieur à" class="form-control"[(ngModel)]="option6Value">       
+            </div>
+            <div class="col-md-2"> 
+              <label for="dinf">création Inférieur à:</label>
+            </div>
+            <div class="col-md-4">
+            <input type="date" class="form-control" placeholder="inférieur à"[(ngModel)]="option12Value">       
+            </div>   
+            </div>
+            <div class="row">
+              <div class="col-md-2"> 
+            <label for="dinf">statut Supérieur à:</label>
+              </div>
+              <div class="col-md-4">
+              <input type="date" placeholder="supérieur à" class="form-control"[(ngModel)]="option8Value">       
+              </div>
+              <div class="col-md-2"> 
+                <label for="dinf">statut Inférieur à:</label>
+              </div>
+              <div class="col-md-4">
+              <input type="date" class="form-control" placeholder="inférieur à"[(ngModel)]="option13Value">       
+              </div>   
+              </div>
+      </div>
+   <!--<div class="col-md-9">
+<input class="form-control" id="recherche" type="text" placeholder="Chercher"[(ngModel)]="optionValue">                    
+      </div>-->   
+      <div class="col-md-3">
+<button class="btn btn-secondary btn-block"(click)="filterallreclamations()"*ngIf="showfilterbutton"><i class="fa fa-search"></i>Chercher</button> 
+<button class="btn btn-danger btn-block"(click)="refreshrecs()"*ngIf="showreinitbutton"><i class="fa fa-search"></i>Réinitialiser les filtres</button> 
+
+<!--<button class="btn btn-danger btn-block"(click)="resetsearch()"><i class="fa fa-search"></i>Réinitialiser la recherche</button>-->           
+      </div>                   
+
+</fieldset>
+<div style="float: right;"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">
+  <div class="panel-group" id="accordion">
+  <div class="panel panel-default">
+    <button type="button" class="btn btn-success" (click)="openrecbox()">Traiter par lot</button>                			
+  </div>
+  </div> 
+</div>
+<div class="container-fluid" id="gloal"*ngIf="showreclamationseme||showreclamationsacq||showreclamationsonus||showreclamations||user.usertype=='comite arbitrage'"> 
+<div id="loader" *ngIf="loading"></div>
+<mat-tab-group (selectedTabChange)="onTabClick($event)">
+      <mat-tab label="liste des réclamations" *ngIf="showreclamations">
+        <ng-template mat-tab-label style="padding: 3px;">
+          <div class="col" style="margin-left: 20px;">liste des réclamations</div>
+        <!--<span (click)="click2()"><i class="glyphicon glyphicon-remove"></i></span>-->  
+      </ng-template>
+      <div class="col-lg-12" *ngIf="!loading">
+        <div class="team-member" >
+          <div class="users-grid" style="overflow-x:auto;"> 
+            <table class="table table-striped">
+              <thead>
+              <tr>
+                <th scope="col">Code <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="_id" ></i></th>   
+                <th scope="col">Acquéreur</th>   
+                <th scope="col">Emetteur</th>   
+                <th scope="col">Carte</th>   
+                <th scope="col">Montant</th>   
+                <th scope="col">ID Commerçant</th>   
+                <th scope="col">Date transaction</th>   
+                <th scope="col">Date de création <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="created" ></i></th>  
+                <th scope="col">Statut</th>  
+                <th scope="col">Date Statut</th>  
+                <th scope="col">Deadline</th>  
+                <th scope="col">Daystoact</th>
+              </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let reclamation of reclamations; let i = index">
+          
+                
+                <td>{{reclamation.ref}}{{reclamation.refprefixe}}</td>
+                <td>{{reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].ISSUERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].CARDHOLDERNUMBER|truncatecard}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONAMOUNT}}</td>
+                <td>{{reclamation.transactions[0].MERCHANTIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONDATE|customDate}}</td>
+                <td>{{reclamation.created | customDate}}</td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length==1">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:'':''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length==2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length>2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-3].item}}</span></td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length>0">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].date | customDate}}</span></td>
+                <td ><span *ngIf="showdeadlinetd(reclamation)">{{calculatedeadline(reclamation).returneddate | customDate}}</span> <span *ngIf="!showdeadlinetd(reclamation)"> N/A</span> </td>
+                <td ><span *ngIf="showdeadlinetd(reclamation)">{{calculatedeadline(reclamation).remainingdays}}</span> <span *ngIf="!showdeadlinetd(reclamation)">N/A</span></td>
+                <td>
+                <button type="button" class="btn btn-success" (click)="getNavigation('create-reclamation',reclamation._id)">Consulter</button>                
+                </td>            
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+      </mat-tab>
+      <mat-tab label="liste des réclamations" *ngIf="showreclamationsonus">
+        <ng-template mat-tab-label style="padding: 3px;">
+          <div class="col" style="margin-left: 20px;">Réclamations ONUS</div>
+        <!--<span (click)="click5()"><i class="glyphicon glyphicon-remove"></i></span>-->  
+      </ng-template>
+      <div class="col-lg-12" *ngIf="!loading">
+        <div class="team-member" >
+          <div class="users-grid" style="overflow-x:auto;"> 
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Code <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="_id" ></i></th>   
+                  <th scope="col">Acquéreur</th>   
+                  <th scope="col">Emetteur</th>   
+                  <th scope="col">Carte</th>   
+                  <th scope="col">Montant</th>  
+                  <th scope="col">ID Commerçant</th>    
+                  <th scope="col">Date transaction</th>   
+                  <th scope="col">Date de création <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="created" ></i></th>  
+                  <th scope="col">Statut</th>  
+                  <th scope="col">Date Statut</th>  
+                  <th scope="col">Motif</th>  
+                  <th scope="col">Deadline <i class="fa fa-sort" aria-hidden="true" (click)="showdeadline(reclamationsonus)" [appSort]="reclamationsonus" data-order="desc" data-name="deadline"></i></th>  
+                  <th scope="col">Daystoact</th>
+                  <th scope="col">Ajout</th>
+
+                </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let reclamation of reclamationsonus; let i = index">
+                <td>{{reclamation.ref}}{{reclamation.refprefixe}}</td>
+                <td>{{reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].ISSUERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].CARDHOLDERNUMBER|truncatecard}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONAMOUNT}}</td>
+                <td>{{reclamation.transactions[0].MERCHANTIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONDATE|customDate}}</td>
+                <td>{{reclamation.created | customDate}}</td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length==1">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:'':''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length==2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length>2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-3].item}}</span></td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length>0">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].date | customDate}}</span></td>
+                <td><span *ngIf="filtredreclamation(reclamation.statut).length>0&&usertype!='Clientcomm'&&usertype!='Clientpor'">{{filtermotif(reclamation)}}</span> </td>
+                 
+                <td>{{calculatedeadline(reclamation).returneddate | customDate}}</td>
+                <td>{{calculatedeadline(reclamation).remainingdays}}</td>
+                <td style="width:20px"> 
+                  <input type="checkbox" id="{{ 'checkreclamationsonus' + i }}"/>
+                </td>
+                <td>
+                <button type="button" class="btn btn-success" (click)="getNavigation('create-reclamation',reclamation._id)">Consulter</button>                
+                </td>           
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+      </mat-tab>
+
+      <mat-tab label="liste des réclamations" *ngIf="showreclamationseme">
+        <ng-template mat-tab-label style="padding: 3px;">
+          <div class="col" style="margin-left: 20px;">Réclamations émises</div>
+        <!--<span (click)="click4()"><i class="glyphicon glyphicon-remove"></i></span>-->  
+      </ng-template>
+      <div class="col-lg-12" *ngIf="!loading">
+        <div class="team-member" >
+          <div class="users-grid" style="overflow-x:auto;"> 
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Code <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="_id" ></i></th>   
+                  <th scope="col">Acquéreur</th>   
+                  <th scope="col">Emetteur</th>   
+                  <th scope="col">Carte</th>   
+                  <th scope="col">Montant</th>   
+                  <th scope="col">ID Commerçant</th>   
+                  <th scope="col">Date transaction</th>   
+                  <th scope="col">Date de création <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamationseme" data-order="desc" data-name="created" ></i></th>  
+                  <th scope="col">Statut</th>  
+                  <th scope="col">Date Statut</th>  
+                  <th scope="col">Motif</th>  
+                  <th scope="col">Deadline <i class="fa fa-sort" aria-hidden="true" (click)="showdeadline(reclamationseme)" [appSort]="reclamationseme" data-order="desc" data-name="deadline"></i></th>  
+                  <th scope="col">Daystoact</th>
+                  <th scope="col">Ajout</th>  
+
+                </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let reclamation of reclamationseme; let i = index">
+                <td>{{reclamation.ref}}{{reclamation.refprefixe}}</td>
+                <td>{{reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].ISSUERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].CARDHOLDERNUMBER|truncatecard}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONAMOUNT}}</td>
+                <td>{{reclamation.transactions[0].MERCHANTIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONDATE|customDate}}</td>
+                <td>{{reclamation.created | customDate}}</td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length==1">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:'':''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length==2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length>2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-3].item}}</span></td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length>0">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].date | customDate}}</span></td>
+                <td><span *ngIf="filtredreclamation(reclamation.statut).length>0&&usertype!='Clientcomm'&&usertype!='Clientpor'">{{filtermotif(reclamation)}}</span> </td>
+                     
+                <td>{{calculatedeadline(reclamation).returneddate | customDate}}</td>
+                <td>{{calculatedeadline(reclamation).remainingdays}}</td>
+                <td style="width:20px"> 
+                  <input type="checkbox" id="{{ 'checkreclamationseme' + i }}"/>
+                </td> 
+                <td>
+                <button type="button" class="btn btn-success" (click)="getNavigation('create-reclamation',reclamation._id)">Consulter</button>                
+                </td>           
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+      </mat-tab>
+      <mat-tab label="liste des réclamations"*ngIf="showreclamationsacq">
+        <ng-template mat-tab-label style="padding: 3px;">
+          <div class="col" style="margin-left: 20px;">Réclamations reçues</div>
+        <!--<span (click)="click3()"><i class="glyphicon glyphicon-remove"></i></span>-->  
+      </ng-template>
+      <div class="col-lg-12" *ngIf="!loading">
+        <div class="team-member" >
+          <div class="users-grid" style="overflow-x:auto;"> 
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Code <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="_id" ></i></th>   
+                  <th scope="col">Acquéreur</th>   
+                  <th scope="col">Emetteur</th>   
+                  <th scope="col">Carte</th>   
+                  <th scope="col">Montant</th>   
+                  <th scope="col">ID Commerçant</th>   
+                  <th scope="col">Date transaction</th>   
+                  <th scope="col">Date de création <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="created" ></i></th>  
+                  <th scope="col">Statut</th>  
+                  <th scope="col">Date Statut</th>  
+                  <th scope="col"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Motif</th>  
+                  <th scope="col">Deadline <i class="fa fa-sort" aria-hidden="true" (click)="showdeadline(reclamationsacq)" [appSort]="reclamationsacq" data-order="desc" data-name="deadline"></i></th>  
+                  <th scope="col">Daystoact</th>
+                  <th scope="col">Ajout</th>  
+
+                </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let reclamation of reclamationsacq; let i = index">
+                <td>{{reclamation.ref}}{{reclamation.refprefixe}}</td>
+                <td>{{reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].ISSUERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].CARDHOLDERNUMBER|truncatecard}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONAMOUNT}}</td>
+                <td>{{reclamation.transactions[0].MERCHANTIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONDATE|customDate}}</td>
+                <td>{{reclamation.created | customDate}}</td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length==1">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:'':''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length==2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length>2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-3].item}}</span></td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length>0">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].date | customDate}}</span></td>
+                <td><span *ngIf="filtredreclamation(reclamation.statut).length>0&&usertype!='Clientcomm'&&usertype!='Clientpor'">{{filtermotif(reclamation)}}</span> </td>
+                 
+                <td>{{calculatedeadline(reclamation).returneddate | customDate}}</td>
+                <td>{{calculatedeadline(reclamation).remainingdays}}</td>
+                <td style="width:20px"> 
+                  <input type="checkbox" id="{{ 'checkreclamationsacq' + i }}"/>
+                </td> 
+                <td>
+                <button type="button" class="btn btn-success" (click)="getNavigation('create-reclamation',reclamation._id)">Consulter</button>                
+                </td>            
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+      </mat-tab>
+      <mat-tab label="liste des réclamations" *ngIf="user.usertype=='comite arbitrage'">
+        <ng-template mat-tab-label style="padding: 3px;">
+          <div class="col" style="margin-left: 20px;">liste des réclamations Comite arbitrage</div>
+        <!--<span (click)="click6()"><i class="glyphicon glyphicon-remove"></i></span>-->  
+      </ng-template>
+      <div class="col-lg-12" *ngIf="!loading">
+        <div class="team-member" >
+          <div class="users-grid" style="overflow-x:auto;"> 
+            <table class="table table-striped">
+              <thead>
+                <tr>
+                  <th scope="col">Code <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="_id" ></i></th>   
+                  <th scope="col">Acquéreur</th>   
+                  <th scope="col">Emetteur</th>   
+                  <th scope="col">Carte</th>   
+                  <th scope="col">Montant</th> 
+                  <th scope="col">ID Commerçant</th>     
+                  <th scope="col">Date transaction</th>   
+                  <th scope="col">Date de création <i class="fa fa-sort" aria-hidden="true" [appSort]="reclamations" data-order="desc" data-name="created" ></i></th>  
+                  <th scope="col">Statut</th>  
+                  <th scope="col">Date Statut</th>  
+                  <th scope="col">Motif</th>  
+                  <th scope="col">Deadline <i class="fa fa-sort" aria-hidden="true" (click)="showdeadline(reclamationscomite)" [appSort]="reclamationscomite" data-order="desc" data-name="deadline"></i></th>  
+                  <th scope="col">Daystoact</th>
+                  <th scope="col">Ajout</th>  
+
+                </tr>
+              </thead>
+              <tbody>
+              <tr *ngFor="let reclamation of reclamationscomite; let i = index">
+                <td>{{reclamation.ref}}{{reclamation.refprefixe}}</td>
+                <td>{{reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].ISSUERBANKIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].CARDHOLDERNUMBER|truncatecard}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONAMOUNT}}</td>
+                <td>{{reclamation.transactions[0].MERCHANTIDENTIFICATION}}</td>
+                <td>{{reclamation.transactions[0].TRANSACTIONDATE|customDate}}</td>
+                <td>{{reclamation.created | customDate}}</td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length==1">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:'':''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length==2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:''}}</span><span *ngIf="filtredreclamation(reclamation.statut).length>2">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].item | changestatus:reclamation:user:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-2].item:filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-3].item}}</span></td>
+                <td ><span *ngIf="filtredreclamation(reclamation.statut).length>0">{{filtredreclamation(reclamation.statut)[filtredreclamation(reclamation.statut).length-1].date | customDate}}</span></td>
+                <td><span *ngIf="filtredreclamation(reclamation.statut).length>0&&usertype!='Clientcomm'&&usertype!='Clientpor'">{{filtermotif(reclamation)}}</span> </td>
+                    
+                <td>{{calculatedeadline(reclamation).returneddate | customDate}}</td>
+                <td>{{calculatedeadline(reclamation).remainingdays}}</td>
+                <td style="width:20px"> 
+                  <input type="checkbox" id="{{ 'checkreclamationscomite' + i }}"/>
+                </td> 
+                <td>
+                <button type="button" class="btn btn-success" (click)="getNavigation('create-reclamation',reclamation._id)">Consulter</button>                
+                </td>           
+              </tr>
+              </tbody>
+            </table>
+          </div>
+          
+        </div>
+      </div>
+      </mat-tab>
+      </mat-tab-group>
+  
+      <!--modal for multi rec add-->
+      <div
+      id="filter"
+      class="modal"
+      tabindex="-1"
+      role="dialog"
+      [ngStyle]="{'display':displaybox}">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="text-align: center;">
+            <h4 class="modal-title">Enrichissement des réclamations</h4>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <fieldset>
+                  <legend>Liste des réclamations</legend>
+                  <div class="users-grid"  style="overflow-x:auto;overflow-y: auto;height: 200px;">
+                      <table class="table table-striped">
+                          <thead>
+                              <tr>
+                                <th scope="col" [style.top]="inverseOfTranslation">Code</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Date transaction</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Heure transaction</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Carte</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Montant</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Code Autorisation</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Nom Commerçant</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">ID commerçant</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Type de transaction</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Acquéreur</th>
+                                <th scope="col" [style.top]="inverseOfTranslation">Canal</th>
+                                <th scope="col" [style.top]="inverseOfTranslation"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Date expiration</th>
+                      <th scope="col" [style.top]="inverseOfTranslation"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Emetteur</th>
+                      <th scope="col" [style.top]="inverseOfTranslation"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">ARN</th>
+                                <th scope="col" [style.top]="inverseOfTranslation"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Cycle de trasnaction</th>
+                                <th scope="col" [style.top]="inverseOfTranslation"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Montant compensé</th>                      
+                              </tr>
+                              </thead>
+                              <tbody *ngIf="filtreditemschecked">
+                                <tr *ngFor="let comp of transactions, let i=index">
+                                  <td>{{filtreditemschecked[i].ref}}{{filtreditemschecked[i].refprefixe}}</td>
+                                  <td>{{comp.TRANSACTIONDATE|customDate}}</td>
+                                  <td>{{comp.TRANSACTIONTIME}}</td>
+                                  <td>{{comp.CARDHOLDERNUMBER |truncatecard}}</td>
+                                  <td>{{comp.TRANSACTIONAMOUNT}}</td>
+                                  <td>{{comp.AUTHORIZATIONCODE}}</td>
+                                  <td>{{comp.MERCHANTNAME}}</td>
+                                  <td>{{comp.MERCHANTIDENTIFICATION}}</td>
+                                  <td>{{filtervalue(comp.TRANSACTIONCODE)}}</td>
+                                  <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+                                  <td>{{filtervalue(comp.CHANNELTRANSACTIONID)}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.CARDEXPIRYDATE}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ISSUERBANKIDENTIFICATION}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ACQUIRERREFERENCENUMBER}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.TRANSACTIONORDERUSAGECODE}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.SETTLEMENTAMOUNT}}</td>
+                                </tr>
+                              </tbody>
+                      </table>
+                    </div> 
+              </fieldset>
+              <select class="input-field"(change)="changeaction($event)"[(ngModel)]="selectedaction" style="background-color: lightgrey;"*ngIf="samestate()">
+                <option value="" disabled="true" [selected]="true">..choisir action</option>
+                <option *ngFor="let action of availableactions()" [value]="action"><span *ngIf="filtreditemschecked[0].statut.length==1">{{action | changestatus:filtreditemschecked[0]:user:filtreditemschecked[0].statut[filtreditemschecked[0].statut.length-1].item:''}}</span><span *ngIf="filtreditemschecked[0].statut.length>1">{{action | changestatus:filtreditemschecked[0]:user:filtreditemschecked[0].statut[filtreditemschecked[0].statut.length-1].item:filtreditemschecked[0].statut[filtreditemschecked[0].statut.length-2].item}}</span></option>
+                <option value="notifiercommercant"*ngIf="user.banque==filtreditemschecked[0].transactions[0].ACQUIRERBANKIDENTIFICATION">Notifier commerçant</option>
+                <option value="réponse"*ngIf="user.usertype=='Clientcomm'">Réponse commerçant</option>
+                <option value="notification"*ngIf="user.usertype=='Metier'">Ajouter note</option>
+              </select>
+              <fieldset *ngIf="showmotif" [formGroup]="reclamationform">
+                <legend>Motif de la réclamation:</legend>
+                <div>
+                  <label for=""> Groupe: &nbsp;
+                    <select class="input-field"placeholder="Client" id="client"#someHashName31 formControlName="groupe" name="motif"(change)="onchangegroupe(this.reclamationform.get('groupe').value)" (click)="sort()"*ngIf="user.usertype!='Clientcomm'&&user.usertype!='Clientpor'">
+                      <option hidden [value]=""></option>
+                      <option value=""></option>
+                      <option *ngFor="let gr of settedgroupes" [value]="gr">
+                        {{gr}}
+                    </option>
+                            <option hidden value="Autre">Autre</option>
+                    </select>
+                  </label>
+                 <br>
+                 <label for=""> Famille: &nbsp;
+                  <select class="input-field"placeholder="Client" id="client"#someHashName31 formControlName="famille" name="motif"(change)="onchangefamille(this.reclamationform.get('famille').value)" (click)="sort()"*ngIf="user.usertype!='Clientcomm'&&user.usertype!='Clientpor'">
+                    <option hidden [value]=""></option>
+                    <option value=""></option>
+                    <option *ngFor="let fam of onchangegroupe(this.reclamationform.get('groupe').value)" [value]="fam">
+                      {{fam}}
+                  </option>
+                          <option hidden value="Autre">Autre</option>
+                  </select>
+                 </label>
+                <br>
+              <label for=""> Motif: &nbsp;
+                <select class="input-field"placeholder="Client" id="client"#someHashName31 formControlName="motif" name="motif" (click)="sort()"*ngIf="user.usertype!='Clientcomm'&&user.usertype!='Clientpor'"(change)="verifychb()">
+                  <option hidden [value]=""></option>
+                  <option value=""></option>
+                  <option *ngFor="let mo of onchangefamille(this.reclamationform.get('famille').value)" [value]="mo.id+mo.intitule">
+                    {{mo.id}}{{mo.intitule}}
+                </option>
+                        <option hidden value="Autre">Autre</option>
+                </select>
+              </label>
+              
+                </div>
+              </fieldset>
+          <fieldset *ngIf="showform">
+            <legend>Formulaire d'enrichissement de la réclamation&nbsp;<span *ngIf="filtreditemschecked[0].statut.length==1" style="color: brown;">{{selectedaction | changestatus:filtreditemschecked[0]:user:filtreditemschecked[0].statut[filtreditemschecked[0].statut.length-1].item:''}}</span><span *ngIf="filtreditemschecked[0].statut.length>1"style="color: brown;">{{selectedaction | changestatus:filtreditemschecked[0]:user:filtreditemschecked[0].statut[filtreditemschecked[0].statut.length-1].item:filtreditemschecked[0].statut[filtreditemschecked[0].statut.length-2].item}}</span></legend>
+            <table class="table table-striped">
+                <thead>
+                <tr>   
+                <th>Commentaire</th>
+                <th>Document </th>
+                </tr>
+                </thead>
+                <tbody *ngIf="filtreditemschecked">
+                    
+                    <tr [formGroup]="reclamationform">
+                      <td>
+                        
+                          <textarea type="text" class="form-control" formControlName="commentaire" id="commentaire" placeholder=" Entrez commentaire"name="" id="" cols="30" rows="10"></textarea>
+                      </td>
+                      <td>
+                        <div class="form-group">
+                          <label for="input">Attacher votre document </label>                   
+                         <input type="file" multiple #filePicker (change)="onImagePick($event)" class="form-control" accept="application/pdf" >
+                         <div class="image-preview" *ngIf="imagePreview">
+                           <img [src]="imagePreview" alt="">
+                         </div>
+                         <p class="text-success" *ngIf="fileUploaded">Fichier chargé !</p>  
+                     </div>
+                      </td>
+                    </tr>
+                </tbody>
+                </table>
+                <hr>
+                <div >
+                  <!--<button class="btn btn-success" (click)="onSubmit()"*ngIf="selectedaction"><i class="fa fa-refresh fa-spin"*ngIf="submitted"></i>Sauvegarder</button>-->
+                  <button class="btn btn-primary" (click)="onSend(user)"*ngIf="selectedaction"><i class="fa fa-refresh fa-spin"*ngIf="submitted"></i>Valider</button> 
+                  <button class="btn btn-danger" (click)="reloadPage()"*ngIf="selectedaction"><i class="fa fa-refresh fa-spin"*ngIf="loading"></i>Annuler</button>  
+                 
+                </div>
+              </fieldset>
+          
+          </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" 
+                    (click)="closePopup()">
+              Fermer formulaire de traitement par lot
+            </button>
+          </div>
+        </div>
+      </div>
+      </div>
+</div>    
+</body>

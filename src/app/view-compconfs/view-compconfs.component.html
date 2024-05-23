@@ -1,0 +1,427 @@
+
+<h2 style="text-align: center;">Liste des transactions (fichier Compconf)</h2>
+<p *ngIf="userinfos.length==0&&usertype!='Agence'&&usertype!='Metier'||loading"style="text-align: center;">veuillez patientez! vos transactions sont en cours de chargement ...</p>
+<div id="loader" *ngIf="userinfos.length==0&&usertype!='Agence'&&usertype!='Metier'||loading">
+  
+</div>
+<div *ngIf="userinfos.length>0||!loading">
+    
+  <div class="container mt-5"[ngStyle]="{'display':displaysearch}">
+    <div class="row d-flex justify-content-center">
+        <div class="col-md-10">
+            <div class="card p-3  py-4">
+              <fieldset *ngIf="usertype=='Clientcomm'||usertype=='Clientpor'">
+                <legend>liste des cartes associèes au compte du client:</legend>
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th scope="col">Compte</th>              
+                      <th scope="col">Carte</th>
+                      <th scope="col">Confirmation</th>          
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let info of userinfos,let i=index"> 
+                      <td><span>{{info.compte}}</span></td>
+                      <td><span>{{info.carte}}</span></td>
+                      <td style="width:20px"> 
+                        <input type="checkbox" id="{{ 'checkuserinfo' + i }}"/>
+                      </td> 
+                    </tr>
+                    </tbody>
+                  </table>
+    <button class="btn btn-primary btn-block"(click)="search()"><i class="fa fa-search"></i><i class="fa fa-refresh fa-spin" *ngIf="loading"></i>Charger plus</button>                
+              </fieldset>
+              <fieldset>
+                <h5>chercher transaction</h5>
+                <div class="mt-3">                   
+                  <div class="card card-body"> 
+                    <div class="row">
+                    <div class="col-md-6">
+                    <input type="text" placeholder="ID commerçant" class="form-control"[(ngModel)]="option1Value">       
+                    </div>
+                    <div class="col-md-6"*ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">
+                    <input type="text" class="form-control" placeholder="Num Carte"[(ngModel)]="option2Value">       
+                    </div>   
+                    </div>
+                    <div class="row">
+                      <div class="col-md-2"> 
+                    <label for="dinf">Supérieur à:</label>
+                      </div>
+                      <div class="col-md-4">
+                      <input type="date" placeholder="supérieur à" class="form-control"[(ngModel)]="option3Value">       
+                      </div>
+                      <div class="col-md-2"> 
+                        <label for="dinf">Inférieur à:</label>
+                      </div>
+                      <div class="col-md-4">
+                      <input type="date" class="form-control" placeholder="inférieur à"[(ngModel)]="option4Value">       
+                      </div>   
+                      </div>
+                    </div>
+                </div> 
+                <div class="row g-3 mt-2">
+                 <!--<div class="col-md-9">
+    <input class="form-control" id="recherche" type="text" placeholder="Chercher"[(ngModel)]="optionValue">                    
+                    </div>-->   
+                    <div class="col-md-3">
+    <button class="btn btn-secondary btn-block"(click)="filtercompconf()"><i class="fa fa-search"></i>Chercher</button> 
+   <!--<button class="btn btn-danger btn-block"(click)="resetsearch()"><i class="fa fa-search"></i>Réinitialiser la recherche</button>-->           
+               
+                    </div>                   
+</div>
+
+              </fieldset>
+    
+</div>         
+</div>     
+</div>
+</div>  
+      <mat-paginator *ngIf="filtredcompconfsbyportcomm.length>0"(page)="onPageChange($event)"[length]="filtredcompconfsbyportcomm.length"[pageSize]="100"[pageSizeOptions]="[100,200,500,1000]"></mat-paginator>
+      <mat-paginator *ngIf="filtredcompconfsbyportcomm.length==0"(page)="onPageChange($event)"[length]="compconfs.length"[pageSize]="100"[pageSizeOptions]="[100,200,500,1000]"></mat-paginator>
+
+  <!--  <div
+  id="filter"
+  class="modal"
+  tabindex="-1"
+  role="dialog"
+  [ngStyle]="{'display':displayStyle}">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="text-align: center;">
+        <h4 class="modal-title">Liste Des Transactions sélectionnées:{{filtreditems.length}}</h4>
+      </div>
+      <div class="modal-body">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+              <th >ID commerçant</th>
+            <th >Canal</th>
+             <th >Type de transaction</th>
+              <th >Montant</th>
+              <th >Date expiration</th>
+              <th >Date transaction</th>
+             
+              <th >Acquéreur</th>
+              <th >Emetteur</th>
+              <th >ARN</th>
+              <th >Cycle de trasnaction</th>
+              <th >Montant compensé</th>
+              <th >Heure trasnaction</th>
+              <th >Confirmation</th>
+                </tr>
+            </thead>
+            <tbody *ngIf="filtreditems.length>0">
+              <tr *ngFor="let comp of settedfiltreditems, let i=index">
+                <td>{{comp.MERCHANTIDENTIFICATION}}</td>           
+                <td>{{comp.CHANNELTRANSACTIONID}}</td>
+                <td>{{comp.TRANSACTIONCODE}}</td>
+                <td>{{comp.TRANSACTIONAMOUNT}}</td>
+                <td>{{comp.CARDEXPIRYDATE}}</td>
+                <td>{{comp.TRANSACTIONDATE}}</td>            
+                <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+                <td>{{comp.ISSUERBANKIDENTIFICATION}}</td>
+                <td>{{comp.ACQUIRERREFERENCENUMBER}}</td>
+                <td>{{comp.TRANSACTIONORDERUSAGECODE}}</td>
+                <td>{{comp.SETTLEMENTAMOUNT}}</td>
+                <td>{{comp.TRANSACTIONTIME}}</td>
+                <td style="width:20px"> 
+                  <input type="checkbox" id="{{ 'check' + i }}"/>
+                </td>
+              </tr>
+              <tr style="text-align: center;">
+               <button type="button" class="btn btn-secondary" (click)="create()">Générer réclamation</button>        
+              </tr>
+            </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" 
+                (click)="closePopupbox()">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+  </div>-->
+
+  <button type="button" class="btn btn-success" (click)="createtransaction()">Générer réclamation</button>
+      <!--modal for multi rec add-->
+      <div
+      id="filter"
+      class="modal"
+      tabindex="-1"
+      role="dialog"
+      [ngStyle]="{'display':displaybox}">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header" style="text-align: center;">
+            <h4 class="modal-title">Enrichissement des réclamations</h4>
+          </div>
+          <div class="modal-body">
+            <div class="container-fluid">
+              <fieldset>
+                  <legend>Liste des réclamations &nbsp;:{{filtreditemschecked.length}}</legend>
+                  <div class="users-grid"  style="overflow-x:auto;overflow-y: auto;height: 200px;">
+                      <table class="table table-striped">
+                          <thead>
+                              <tr>
+                                <th >Date transaction</th>
+                                <th >Heure transaction</th>
+                                <th >Carte</th>
+                                <th >Montant</th>
+                                <th >Code Autorisation</th>
+                                <th >Nom Commerçant</th>
+                                <th >ID commerçant</th>
+                                <th >Type de transaction</th>
+                                <th >Acquéreur</th>
+                                <th >Canal</th>
+                                <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Date expiration</th>
+            <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Emetteur</th>
+       <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">ARN</th>
+                                <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Cycle de trasnaction</th>
+                                <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Montant compensé</th>
+                              </tr>
+                              </thead>
+                              <tbody *ngIf="filtreditemschecked">
+                                <tr *ngFor="let comp of transactions, let i=index">
+                                  <td>{{comp.TRANSACTIONDATE|customDate}}</td>
+                                  <td>{{comp.TRANSACTIONTIME}}</td>
+                                  <td>{{comp.CARDHOLDERNUMBER |truncatecard}}</td>
+                                  <td>{{comp.TRANSACTIONAMOUNT}}</td>
+                                  <td>{{comp.AUTHORIZATIONCODE}}</td>
+                                  <td>{{comp.MERCHANTNAME}}</td>
+                                  <td>{{comp.MERCHANTIDENTIFICATION}}</td>
+                                  <td>{{filtervalue(comp.TRANSACTIONCODE)}}</td>
+                                  <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+                                  <td>{{filtervalue(comp.CHANNELTRANSACTIONID)}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.CARDEXPIRYDATE}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ISSUERBANKIDENTIFICATION}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ACQUIRERREFERENCENUMBER}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.TRANSACTIONORDERUSAGECODE}}</td>
+                                  <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.SETTLEMENTAMOUNT}}</td>
+                                </tr>
+                              </tbody>
+                      </table>
+                    </div> 
+              </fieldset>
+          <fieldset>
+              <legend>Formulaire d'enrichissement de la réclamation</legend>
+              <table class="table table-striped">
+                <thead>
+                <tr>   
+                <th>Commentaire</th>
+                <th>Document </th>
+                </tr>
+                </thead>
+                <tbody *ngIf="filtreditemschecked">
+                    
+                  <tr [formGroup]="reclamationform">
+                    <td>
+                   
+                        <textarea type="text" class="form-control" formControlName="commentaire" id="commentaire" placeholder=" Entrez commentaire"name="" id="" cols="30" rows="10"></textarea>
+                    </td>
+
+                    <td>
+                      <div class="form-group">
+                        <label for="input">Attacher votre document </label>                   
+                       <input type="file"multiple  #filePicker (change)="onImagePick($event)" class="form-control" accept="application/pdf">
+                       <div class="image-preview" *ngIf="imagePreview">
+                         <img [src]="imagePreview" alt="">
+                       </div>
+                       <p class="text-success" *ngIf="fileUploaded">Fichier chargé !</p>  
+                   </div>
+                    </td>
+                  </tr>
+                </tbody>
+                </table>
+                <button class="btn btn-success" (click)="onSubmit()"><i class="fa fa-refresh fa-spin"*ngIf="loading"></i>Valider réclamation</button>
+          </fieldset>
+          
+          </div>
+          </div>
+          <div class="modal-footer">
+  <button type="button" class="btn btn-danger"(click)="closePopupenr()"><i class="fa fa-refresh fa-spin"*ngIf="deleting"></i>Annuler</button>
+          </div>
+        </div>
+      </div>
+      </div>        
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th >Date transaction</th>
+          <th >Heure transaction</th>
+          <th >Carte</th>
+          <th >Montant</th>
+          <th >Code Autorisation</th>
+          <th >Nom Commerçant</th>
+          <th >ID commerçant</th>
+          <th >Type de transaction</th>
+          <th >Acquéreur</th>
+          <th >Canal</th>
+          <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Date expiration</th>
+<th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Emetteur</th>
+<th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">ARN</th>
+          <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Cycle de trasnaction</th>
+          <th *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">Montant compensé</th>
+        </tr>
+      </thead>
+      <tbody *ngIf="filtreditems.length>0">
+        <tr *ngFor="let comp of filtreditems">
+          <td>{{comp.TRANSACTIONDATE|customDate}}</td>
+          <td>{{comp.TRANSACTIONTIME}}</td>
+          <td>{{comp.CARDHOLDERNUMBER |truncatecard}}</td>
+          <td>{{comp.TRANSACTIONAMOUNT}}</td>
+          <td>{{comp.AUTHORIZATIONCODE}}</td>
+          <td>{{comp.MERCHANTNAME}}</td>
+          <td>{{comp.MERCHANTIDENTIFICATION}}</td>
+          <td>{{filtervalue(comp.TRANSACTIONCODE)}}</td>
+          <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+          <td>{{filtervalue(comp.CHANNELTRANSACTIONID)}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.CARDEXPIRYDATE}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ISSUERBANKIDENTIFICATION}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ACQUIRERREFERENCENUMBER}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.TRANSACTIONORDERUSAGECODE}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.SETTLEMENTAMOUNT}}</td>
+          <td><button type="button" class="btn btn-success" (click)="getNavigation('view-carousel',carousel._id)">Consulter</button></td>
+          <td><button type="button" class="btn btn-primary" (click)="getNavigation('modify-carousel',carousel._id)">Modifier</button></td>
+          <td><button type="button" class="btn btn-danger" (click)="onDelete(carousel._id)">Supprimer</button></td>          
+        </tr>
+      </tbody>
+      <tbody>
+        <tr *ngFor="let comp of currentItemsToShownormal,let i=index">
+          <td>{{comp.TRANSACTIONDATE|customDate}}</td>
+          <td>{{comp.TRANSACTIONTIME}}</td>
+          <td>{{comp.CARDHOLDERNUMBER |truncatecard}}</td>
+          <td>{{comp.TRANSACTIONAMOUNT}}</td>
+          <td>{{comp.AUTHORIZATIONCODE}}</td>
+          <td>{{comp.MERCHANTNAME}}</td>
+          <td>{{comp.MERCHANTIDENTIFICATION}}</td>
+          <td>{{filtervalue(comp.TRANSACTIONCODE)}}</td>
+          <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+          <td>{{filtervalue(comp.CHANNELTRANSACTIONID)}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.CARDEXPIRYDATE}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ISSUERBANKIDENTIFICATION}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.ACQUIRERREFERENCENUMBER}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.TRANSACTIONORDERUSAGECODE}}</td>
+          <td *ngIf="usertype!='Clientcomm'&&usertype!='Clientpor'">{{comp.SETTLEMENTAMOUNT}}</td>
+                  <td style="width:20px"> 
+                    <input type="checkbox" id="{{ 'checktransactioninfo' + i }}"[disabled]="!displaytran(comp.ACQUIRERREFERENCENUMBER)"(click)="verifydeadline(comp.PROCESSINGDATE,i)"/>
+                  </td> 
+                <td *ngIf="!displaytran(comp.ACQUIRERREFERENCENUMBER)" style="display: flex;"><span style="color: red;">Réclamée</span><button type="button" class="btn btn-success" (click)="getNavigation('create-reclamation',visitrec(comp.ACQUIRERREFERENCENUMBER))"> Consulter</button>                
+                </td>    
+  
+        </tr>
+        </tbody>
+      </table> 
+    <!-- <cdk-virtual-scroll-viewport #scrollViewport itemSize="50">
+      <table class="table table-striped">
+        <thead>
+        <tr>
+          <th >Motif CHB</th>  
+          <th >Cycle CHB</th>
+          <th >MESSAGE</th>
+          <th >Confirmation</th>
+        </tr>
+        </thead>
+        <tbody *ngIf="filtreditems.length>0">
+          <tr *ngFor="let comp of filtreditems">
+            <td>{{comp.MERCHANTIDENTIFICATION}}</td>
+            <td>{{comp.BATCHIDENTIFICATION}}</td>
+            <td>{{comp.INVOICENUMBER}}</td>
+            <td>{{comp.CARDHOLDERNUMBER}}</td>
+            <td>{{comp.MERCHANTSECTOR}}</td>
+            <td>{{comp.CHANNELTRANSACTIONID}}</td>
+            <td>{{comp.OPERATIONCODE}}</td>
+            <td>{{comp.TRANSACTIONCODE}}</td>
+            <td>{{comp.TRANSACTIONAMOUNT}}</td>
+            <td>{{comp.CARDEXPIRYDATE}}</td>
+            <td>{{comp.PROCESSINGDATE}}</td>
+            <td>{{comp.TRANSACTIONDATE}}</td>
+            <td>{{comp.AUTHORIZATIONCODE}}</td>
+            <td>{{comp.REMITTANCEDATE}}</td>
+            <td>{{comp.MERCHANTCATEGORIECODE}}</td>
+            <td>{{comp.FILLER}}</td>
+            <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+            <td>{{comp.LOCALCARDSYSTEMNETWORK}}</td>
+            <td>{{comp.ISSUERBANKIDENTIFICATION}}</td>
+            <td>{{comp.ACQUIRERREFERENCENUMBER}}</td>
+            <td>{{comp.TRANSACTIONORDERUSAGECODE}}</td>
+            <td>{{comp.MERCHANTNAME}}</td>
+            <td>{{comp.SETTLEMENTAMOUNT}}</td>
+            <td>{{comp.FILLER2}}</td>
+            <td>{{comp.ENDOFRECORD}}</td>
+            <td><button type="button" class="btn btn-success" (click)="getNavigation('view-carousel',carousel._id)">Consulter</button></td>
+            <td><button type="button" class="btn btn-primary" (click)="getNavigation('modify-carousel',carousel._id)">Modifier</button></td>
+            <td><button type="button" class="btn btn-danger" (click)="onDelete(carousel._id)">Supprimer</button></td>          
+          </tr>
+        </tbody>
+        <tbody>
+        <tr *cdkVirtualFor="let comp of currentItemsToShowchargeback,let i=index">
+                  <td>{{comp.CHARGEBACKREASONCODE}}</td>
+                  <td>{{filtervalue(comp.CHARGEBACKTRANSACTIONCYCLE)}}</td>
+                  <td>{{comp.MESSAGE}}</td>
+                  <td style="width:20px"> 
+                    <input type="checkbox" id="{{ 'checksecondtransactioninfo' + i }}"/>
+                  </td>        
+        </tr>
+        </tbody>
+      </table> 
+      </cdk-virtual-scroll-viewport>
+      <cdk-virtual-scroll-viewport #scrollViewport itemSize="50">
+        <table class="table table-striped">
+          <thead>
+          <tr>
+            <th >Motif CHB</th>  
+            <th >Cycle CHB</th>
+            <th >MESSAGE</th>
+            <th >Confirmation</th>
+  
+          </tr>
+          </thead>
+          <tbody *ngIf="filtreditems.length>0">
+            <tr *ngFor="let comp of filtreditems">
+              <td>{{comp.MERCHANTIDENTIFICATION}}</td>
+              <td>{{comp.BATCHIDENTIFICATION}}</td>
+              <td>{{comp.INVOICENUMBER}}</td>
+              <td>{{comp.CARDHOLDERNUMBER}}</td>
+              <td>{{comp.MERCHANTSECTOR}}</td>
+              <td>{{comp.CHANNELTRANSACTIONID}}</td>
+              <td>{{comp.OPERATIONCODE}}</td>
+              <td>{{comp.TRANSACTIONCODE}}</td>
+              <td>{{comp.TRANSACTIONAMOUNT}}</td>
+              <td>{{comp.CARDEXPIRYDATE}}</td>
+              <td>{{comp.PROCESSINGDATE}}</td>
+              <td>{{comp.TRANSACTIONDATE}}</td>
+              <td>{{comp.AUTHORIZATIONCODE}}</td>
+              <td>{{comp.REMITTANCEDATE}}</td>
+              <td>{{comp.MERCHANTCATEGORIECODE}}</td>
+              <td>{{comp.FILLER}}</td>
+              <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+              <td>{{comp.LOCALCARDSYSTEMNETWORK}}</td>
+              <td>{{comp.ISSUERBANKIDENTIFICATION}}</td>
+              <td>{{comp.ACQUIRERREFERENCENUMBER}}</td>
+              <td>{{comp.TRANSACTIONORDERUSAGECODE}}</td>
+              <td>{{comp.MERCHANTNAME}}</td>
+              <td>{{comp.SETTLEMENTAMOUNT}}</td>
+              <td>{{comp.FILLER2}}</td>
+              <td>{{comp.ENDOFRECORD}}</td>
+              <td><button type="button" class="btn btn-success" (click)="getNavigation('view-carousel',carousel._id)">Consulter</button></td>
+              <td><button type="button" class="btn btn-primary" (click)="getNavigation('modify-carousel',carousel._id)">Modifier</button></td>
+              <td><button type="button" class="btn btn-danger" (click)="onDelete(carousel._id)">Supprimer</button></td>          
+            </tr>
+          </tbody>
+          <tbody>
+          <tr *cdkVirtualFor="let comp of currentItemsToShowsecond,let i=index">
+                    <td>{{comp.CHARGEBACKREASONCODE}}</td>
+                    <td>{{comp.ndPRESENTMENTTRANSACTIONCYCLE}}</td>
+                    <td>{{comp.PRESENTMENTINDICATOR}}</td>
+                    <td style="width:20px"> 
+                      <input type="checkbox" id="{{ 'checkthirdtransactioninfo' + i }}"/>
+                    </td>          
+          </tr>
+          </tbody>
+        </table> 
+      </cdk-virtual-scroll-viewport>--> 
+</div>
+ 

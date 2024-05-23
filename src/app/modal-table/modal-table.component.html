@@ -1,0 +1,27 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title style="text-align: center;">Liste des comptes de l'utilisateur</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closeModal('','')">Close</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <table>
+    <thead>
+      <tr>
+        <th scope="col">Code </th>
+        <th scope="col">Email </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let user of modalarray; let i = index"> 
+        <td>{{user.clientcode}}</td>
+        <td>{{user.email}}</td>
+        <td><button type="button" class="btn btn-success" (click)="onLogin(user.email,user._id)">Utiliser ce compte</button></td>
+      </tr>
+      </tbody>
+  </table>
+</ion-content>
+<button type="button" class="btn btn-danger" (click)="closeModal('','')">Corriger Mot de Passe</button>
+

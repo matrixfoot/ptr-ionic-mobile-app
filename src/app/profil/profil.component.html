@@ -1,0 +1,38 @@
+
+
+  <body>
+
+    <h2 style="text-align: center;">Informations générales</h2>
+    
+    <div class="container-fluid"*ngIf="user">
+      <img src="../../assets/img_avatar.png" *ngIf="civilite=='Monsieur'" else alt="Black and White Portrait of a Man" style="width:10% ;height:10%">
+      <img src="../../assets/img_avatar2.png" *ngIf="civilite=='Madame'" alt="Black and White Portrait of a Man" style="width:10% ;height:10%">
+      <img src="https://mdbcdn.b-cdn.net/img/new/avatars/1.webp" *ngIf="civilite!='Madame'&&civilite!='Monsieur'" alt="Black and White Portrait of a Man" style="width:10% ;height:10%">
+      <div class="container-fluid">
+        <h4 >Utilisateur connecté:</h4><hr><h4>{{ user.civilite }} <b>  {{ user.firstname }} {{ user.lastname }}</b></h4> 
+        <h4>Nature utilisateur:<b>  {{ user.nature }}</b></h4>
+        <h4>Crée le(heure GMT):<b>  {{ user.created | customDate}}</b></h4>
+        <h4>Dernière modificationle(heure GMT):<b>  {{ user.updated | customDate}}</b></h4>
+        <h4>Numéro mobile:<b>  {{ user.mobile }}</b></h4>
+        <h4>Type utilisateur:<b *ngIf="user.usertype=='comite arbitrage'"> Comité Arbitrage</b><b *ngIf="user.usertype=='Clientpor'"> Client porteur</b><b *ngIf="user.usertype=='Clientcomm'"> Client commerçant</b><b *ngIf="user.usertype=='Metier'">Métier</b>
+        <b *ngIf="user.usertype=='Agence'">Agence</b></h4>
+       <h4 *ngIf="user.indicatifagence">Indicatif agence:<b >{{ user.indicatifagence }}</b></h4>
+       
+        <h4>Email:<b *ngIf="user.contact">{{ user.contact }}</b><b *ngIf="!user.contact">{{ user.email }}</b></h4>
+        <h4>code banque:<b>  {{ user.banque }}</b></h4>
+        <h4 *ngIf="user.usertype=='Clientpor'||user.usertype=='Clientcomm'">Numéro de compte:<b>  {{ user.compte }}</b></h4>
+        <h4 *ngIf="user.usertype=='Clientpor'">Numéro de carte:<b>  {{ user.carte }}</b></h4>
+        <h4 *ngIf="user.usertype=='Clientcomm'">Numéro d'affiliation:<b>  {{ user.affiliation }}</b></h4>
+        <h4 *ngIf="user.usertype=='Clientcomm'">Numéro de terminal:<b>  {{ user.terminal }}</b></h4>
+        <h4 *ngIf="user.usertype=='Clientcomm'">ID commerçant:<b>  {{ user.idcomm }}</b></h4>
+        <h4 *ngIf="user.ficheUrl">Carte d'identification fiscale: <b><a href="{{user.ficheUrl}}" target="_blank">Aperçu CIF</a></b></h4>       
+      </div>
+      <div *ngIf="user.usertype=='Client'"><button type="button" class="btn btn-success" (click)="getNavigation('complete-profil', currentUser.userId)" 
+      *ngIf="!user.natureactivite || user.natureactivite=='Autre/null' || !user.activite || user.activite=='Autre/null'
+      || user.regimefiscalimpot=='Autre/null'|| !user.regimefiscalimpot || !user.matriculefiscale"
+      >Compléter</button></div>
+      <button type="button" class="btn btn-warning" (click)="getNavigation('modify-user', currentUser.userId)">Modifier</button>
+      
+    </div>
+    
+    </body>

@@ -1,0 +1,182 @@
+<div id="loader" *ngIf="loading"></div>
+<button (click)="getNavigation('view-compconfs')" style="float: right;"><span><i class="fa fa-chevron-circle-left" aria-hidden="true"></i></span>Initier autre réclamation</button>
+<div class="container-fluid"*ngIf="reclamation">
+  <h2 style="text-align: center;">Détail de la réclamation</h2> 
+    <fieldset>
+        <legend>Id Réclamation:{{reclamation.ref}}{{reclamation.refprefixe}}</legend>
+        <table class="table table-striped"*ngIf="filtermotif()[0]">
+          <thead>
+            <tr><th>Groupe:&nbsp;<span>{{filtermotif()[2]}}</span></th></tr>
+            <tr><th>Type:&nbsp;<span>{{filtermotif()[1]}}</span></th></tr>
+            <tr><th>Motif:&nbsp;<span>{{filtermotif()[0]}}</span></th></tr>
+          </thead>
+        </table>
+        <legend>Détail de la transaction</legend>
+        <div class="users-grid"  style="overflow-x:auto;overflow-y: auto">
+            <table class="table table-striped" id="tablebordered">
+                <thead>
+                    <tr>
+                      <th scope="col" [style.top]="inverseOfTranslation">Date transaction</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Heure trasnaction</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Carte</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">ARN</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Montant</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Montant compensé</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Acquéreur</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Emetteur</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Type de transaction</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">Canal</th>
+                      <th scope="col" [style.top]="inverseOfTranslation">ID commerçant</th>
+                    </tr>
+                    </thead>
+                    <tbody *ngIf="reclamation">
+                      <tr *ngFor="let comp of reclamation.transactions, let i=index">
+                        <td>{{comp.TRANSACTIONDATE|customDate}}</td>
+                        <td>{{comp.TRANSACTIONTIME}}</td>
+                        <td>{{comp.CARDHOLDERNUMBER |truncatecard}}</td>
+                        <td>{{comp.ACQUIRERREFERENCENUMBER}}</td>
+                        <td>{{comp.TRANSACTIONAMOUNT}}</td>
+                        <td>{{comp.SETTLEMENTAMOUNT}}</td>
+                        <td>{{comp.ACQUIRERBANKIDENTIFICATION}}</td>
+                        <td>{{comp.ISSUERBANKIDENTIFICATION}}</td>
+                        <td>{{filtervalue(comp.TRANSACTIONCODE)}}</td>
+                        <td>{{filtervalue(comp.CHANNELTRANSACTIONID)}}</td>
+                        <td>{{comp.MERCHANTIDENTIFICATION}}</td>
+                      </tr>
+                    </tbody>
+            </table>
+          </div> 
+    </fieldset>
+    <!--Statuts de la réclamation-->
+    <fieldset>
+      <legend>Historique de la réclamation</legend>
+      <div class="users-grid"  style="overflow-x:auto;overflow-y: auto">
+          <table class="table table-striped">
+              <thead>
+                  <tr>
+                    <th scope="col" [style.top]="inverseOfTranslation">Statut</th>
+                    <th scope="col" [style.top]="inverseOfTranslation">Date Statut</th>
+                    <th scope="col" [style.top]="inverseOfTranslation">Acteur</th>
+                    <th scope="col" [style.top]="inverseOfTranslation">Détails</th>
+                  </tr>
+                  </thead>
+                  <tbody *ngIf="reclamation">
+                    <tr *ngFor="let stat of reclamation.statut, let i=index">
+                      <ng-container *ngIf="user.banque==reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION&&user.banque!=reclamation.transactions[0].ISSUERBANKIDENTIFICATION&&stat.acteur!='Clientpor'&&filterstat(stat.date)||user.banque==reclamation.transactions[0].ISSUERBANKIDENTIFICATION&&user.banque!=reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION&&stat.acteur!='Clientcomm'&&stat.acteur!='acquireur'&&stat.etat!='Ajout note'&&stat.etat!='notification commerçant'&&stat.etat!='réponse commerçant'||filterstatcommport(stat.date)||user.banque==reclamation.transactions[0].ISSUERBANKIDENTIFICATION&&user.banque==reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION||filterarbitrage(stat.date)">
+                        <td> <span *ngIf="i>1">{{stat.item | changestatus:reclamation:user:reclamation.statut[i-1].item:reclamation.statut[i-2].item}}</span><span *ngIf="i==1">{{stat.item | changestatus:reclamation:user:reclamation.statut[i-1].item:''}}</span><span *ngIf="i==0">{{stat.item | changestatus:reclamation:user:'':''}}</span>&nbsp;&nbsp;<span class="badge bg-secondary bg-secondary">{{stat.etat}}</span></td>
+                        <td>{{stat.date| customDate:'yes'}}</td>
+                        <td> <span *ngIf="stat.role=='autre'||!stat.role">{{filteracteur(stat.acteur)}}</span><span *ngIf="stat.role!='autre'">{{stat.role| uppercase}}</span></td>
+                        <td><span (click)="opendetail('open-detail',reclamation._id,stat.date)"target="_blank"*ngIf="stat.commentaire||stat.motif" style="text-decoration: underline;cursor: pointer;">Détail</span><span *ngIf="!stat.commentaire&&!stat.motif">Formulaire indisponible</span></td>    
+                        <td>
+                          <button type="button" class="btn btn-danger btn-sm" (click)="removestat(stat.date)"><span><i class="fa fa-minus-circle"></i></span></button>   
+                        </td>
+                      </ng-container>
+                  
+                    </tr>
+                  </tbody>
+          </table>
+        </div>
+        <select class="input-field"(change)="changeaction($event)" style="background-color: lightgrey;">
+          <option value="" disabled="true" [selected]="true">..choisir action</option>
+          <option *ngFor="let action of availableactions()" [value]="action"><span *ngIf="reclamation.statut.length==1">{{action | changestatus:reclamation:user:reclamation.statut[reclamation.statut.length-1].item:''}}</span><span *ngIf="reclamation.statut.length>1">{{action | changestatus:reclamation:user:reclamation.statut[reclamation.statut.length-1].item:reclamation.statut[reclamation.statut.length-2].item}}</span></option>
+          <option value="notifiercommercant"*ngIf="user.banque==reclamation.transactions[0].ACQUIRERBANKIDENTIFICATION">Notifier commerçant</option>
+          <option value="réponse"*ngIf="currentuser.usertype=='Clientcomm'">Répondre</option>
+          <option value="notification"*ngIf="currentuser.usertype=='Metier'">Ajouter note</option>
+
+        </select>
+     <!--<span>Afficher formulaire d'enrichissement<input type="checkbox" id="comm" [(ngModel)]="commvalue"(change)="changecheckbox()"/></span> -->    
+  </fieldset>
+<fieldset *ngIf="showmotif" [formGroup]="reclamationform">
+  <legend>Motif de la réclamation:</legend>
+  <div>
+    <label for=""> Groupe: &nbsp;
+      <select class="input-field"placeholder="Client" id="client"#someHashName31 formControlName="groupe" name="motif"(change)="onchangegroupe(this.reclamationform.get('groupe').value)" (click)="sort()"*ngIf="currentuser.usertype!='Clientcomm'&&currentuser.usertype!='Clientpor'">
+        <option hidden [value]=""></option>
+        <option value=""></option>
+        <option *ngFor="let gr of settedgroupes" [value]="gr">
+          {{gr}}
+      </option>
+              <option hidden value="Autre">Autre</option>
+      </select>
+    </label>
+   <br>
+   <label for=""> Famille: &nbsp;
+    <select class="input-field"placeholder="Client" id="client"#someHashName31 formControlName="famille" name="motif"(change)="onchangefamille(this.reclamationform.get('famille').value)" (click)="sort()"*ngIf="currentuser.usertype!='Clientcomm'&&currentuser.usertype!='Clientpor'">
+      <option hidden [value]=""></option>
+      <option value=""></option>
+      <option *ngFor="let fam of onchangegroupe(this.reclamationform.get('groupe').value)" [value]="fam">
+        {{fam}}
+    </option>
+            <option hidden value="Autre">Autre</option>
+    </select>
+   </label>
+  <br>
+<label for=""> Motif: &nbsp;
+  <select class="input-field"placeholder="Client" id="client"#someHashName31 formControlName="motif" name="motif" (click)="sort()"*ngIf="currentuser.usertype!='Clientcomm'&&currentuser.usertype!='Clientpor'"(change)="verifychb()">
+    <option hidden [value]=""></option>
+    <option value=""></option>
+    <option *ngFor="let mo of onchangefamille(this.reclamationform.get('famille').value)" [value]="mo.id+mo.intitule">
+      {{mo.id}}{{mo.intitule}}
+  </option>
+          <option hidden value="Autre">Autre</option>
+  </select>
+</label>
+
+  </div>
+</fieldset>
+ 
+  <fieldset *ngIf="showform">
+    <legend>Formulaire d'enrichissement de la réclamation&nbsp;<span *ngIf="reclamation.statut.length==1" style="color: brown;">{{selectedaction | changestatus:reclamation:user:reclamation.statut[reclamation.statut.length-1].item:''}}</span><span *ngIf="reclamation.statut.length>1"style="color: brown;">{{selectedaction | changestatus:reclamation:user:reclamation.statut[reclamation.statut.length-1].item:reclamation.statut[reclamation.statut.length-2].item}}</span></legend>
+    <table class="table table-striped">
+      <thead>
+      <tr>   
+      <th>Commentaire</th>
+      <th>Document </th>
+      </tr>
+      </thead>
+      <tbody *ngIf="reclamation">
+      <!--
+        <tr *ngFor="let item of reclamation.changements; let i = index;">  
+            <td  style="text-align: center;width: 50px;"> {{item.id}}</td>     
+            <td  style="text-align: center;">{{item.commentaire| lowercase}}</td>
+            <td  style="text-align: center;"> {{item.motif| lowercase}}</td>
+            <td  style="text-align: center;"> {{item.date| customDate}}</td>
+            <td  style="text-align: center;"> {{filteracteur(item.acteur) }}</td>
+            <td ><a href="{{item.ficheUrl| lowercase}}" target="_blank"*ngIf="item.ficheUrl">Aperçu document</a></td>    
+            <td colspan="7">
+              <div>
+              <button type="button" class="btn btn-danger btn-sm" (click)="removeammount(item.id)"><span><i class="fa fa-minus-circle"></i></span></button>   
+            </div>
+      </td>     
+          </tr>
+      -->    
+          <tr [formGroup]="reclamationform">
+            <td>
+              <div *ngIf="submitted && f.commentaire.errors" class="invalid">
+                <div *ngIf="f.commentaire.errors.required">le commentaire est obligatoire</div>
+            </div>
+                <textarea type="text" class="form-control" formControlName="commentaire" id="commentaire" placeholder=" Entrez commentaire"name="" id="" cols="30" rows="10"></textarea>
+            </td>
+            <td>
+              <div class="form-group">
+                <label for="input">Attacher votre document </label>                   
+               <input type="file" multiple #filePicker (change)="onImagePick($event)" class="form-control" accept="application/pdf">
+               <div class="image-preview" *ngIf="imagePreview">
+                 <img [src]="imagePreview" alt="">
+               </div>
+               <p class="text-success" *ngIf="fileUploaded">Fichier chargé !</p>  
+           </div>
+            </td>
+          </tr>
+      </tbody>
+      </table>
+     
+</fieldset>
+<hr>
+<div >
+  <!--<button class="btn btn-success" (click)="onSubmit()"*ngIf="selectedaction"><i class="fa fa-refresh fa-spin"*ngIf="submitted"></i>Sauvegarder</button>-->
+  <button class="btn btn-primary" (click)="onSend(currentuser)"*ngIf="selectedaction"><i class="fa fa-refresh fa-spin"*ngIf="submitted"></i>Valider</button> 
+  <button class="btn btn-danger" (click)="reloadPage()"*ngIf="selectedaction"><i class="fa fa-refresh fa-spin"*ngIf="loading"></i>Annuler</button>  
+ 
+</div>
+</div>

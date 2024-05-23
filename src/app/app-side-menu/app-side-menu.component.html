@@ -1,0 +1,79 @@
+  <ion-header>
+    <ion-toolbar>
+      <ion-avatar slot="start">
+        <img src="../../assets/img_avatar.png" alt="Avatar">
+      </ion-avatar>
+      <ion-label (click)="closeMenu()" routerLink="profil"*ngIf="isLoggedIn" style="text-decoration: underline;color: blue;right: 10px;" >
+        <h2 *ngIf="nature=='Personne Physique' || !nature">{{username}} {{lastname}}</h2>
+        <h2 *ngIf="nature=='Personne Morale'">{{raisonsociale}}</h2>
+      </ion-label>
+    </ion-toolbar>
+  </ion-header>
+  <ion-content>
+    <ion-list>
+         <!-- Reminder Item -->
+         <ion-item button *ngIf="role=='basic'"(click)="closeMenu()" routerLink="user-board/dsapayer" >
+          <ion-icon slot="start" name="alarm"></ion-icon>
+          <ion-label>Liste des impayés</ion-label>
+          <ion-badge slot="end" color="danger">{{getalldsusernonpaye()[1]}}</ion-badge>
+        </ion-item>
+      <ion-item (click)="closeMenu()" routerLink="home" routerDirection="root">
+        <ion-icon slot="start" name="home"></ion-icon>
+        <ion-label>Acceuil</ion-label>
+      </ion-item>
+      <ion-item *ngIf="role=='admin'" (click)="closeMenu()" routerLink="collab-create"  routerDirection="root">
+        <ion-icon slot="start"name="person-add"></ion-icon>
+        <ion-label>Ajouter collaborateur</ion-label>
+      </ion-item>
+      <!-- Collapsible Section 1 -->
+      <ion-item (click)="toggleSection1()" button>
+        <ion-icon slot="start" name="albums"></ion-icon>
+        <ion-label>Sections</ion-label>
+        <ion-icon [name]="isSection1Open ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </ion-item>
+      <ion-list *ngIf="isSection1Open">
+        <ion-item (click)="closeMenu()" routerLink="who" *ngIf="isLoggedIn"  class="dropdown-item">Qui sommes nous?</ion-item>
+        <ion-item (click)="closeMenu()" routerLink="login"*ngIf="!isLoggedIn" class="dropdown-item">Qui sommes nous?</ion-item>
+        <ion-item (click)="closeMenu()" routerLink="why" *ngIf="isLoggedIn"  class="dropdown-item">Pourquoi choisir Macompta</ion-item>
+        <ion-item (click)="closeMenu()" routerLink="login"  *ngIf="!isLoggedIn"   class="dropdown-item">Pourquoi choisir Macompta</ion-item>
+        <ion-item (click)="closeMenu()" routerLink="contact"  target=”_blank”  class="dropdown-item">Contact</ion-item>
+        <ion-item (click)="closeMenu()" routerLink="career"  class="dropdown-item">Carrière</ion-item>
+      </ion-list>
+      <!-- Collapsible Section 2 -->
+      <ion-item (click)="toggleSection2()" button routerDirection="root"*ngIf="isLoggedIn">
+        <ion-icon slot="start"name="accessibility"></ion-icon>
+        <ion-label>Espace utilisateur</ion-label>
+        <ion-icon [name]="isSection2Open ? 'chevron-up' : 'chevron-down'"></ion-icon>
+      </ion-item>
+      <ion-list *ngIf="isSection2Open">
+        <ion-item (click)="closeMenu()" routerLink="admin-board" *ngIf="role=='admin'"  class="dropdown-item">Tableau de bord Admin</ion-item>
+          <ion-item (click)="closeMenu()" routerLink="settings" *ngIf="role=='admin'"  class="dropdown-item">Paramêtrage Admin</ion-item>
+          <ion-item (click)="closeMenu()" routerLink="addotherds" *ngIf="role=='admin'||role=='supervisor'"  class="dropdown-item">Ajouter autre DS </ion-item>
+          <ion-item (click)="closeMenu()" routerLink="declare-comptabilite" *ngIf="role=='admin'||role=='supervisor'"  class="dropdown-item">Saisie pour le compte du client</ion-item>
+          <ion-item (click)="closeMenu()" routerLink="user-board" *ngIf="role=='basic'" class="dropdown-item">Tableau de bord Utilisateur</ion-item>
+          <ion-item (click)="closeMenu()" routerLink="collab-board" *ngIf="usertype=='Collaborateur'" class="dropdown-item">Tableau de bord Collaborateur</ion-item>
+      </ion-list>
+         <!-- Collapsible Section 3 -->
+         <ion-item (click)="toggleSection3()" routerDirection="root"*ngIf="isLoggedIn&&usertype!='Candidat'">
+          <ion-icon slot="start" name="server"></ion-icon>
+          <ion-label>Services en ligne</ion-label>
+          <ion-icon [name]="isSection3Open ? 'chevron-up' : 'chevron-down'"></ion-icon>
+        </ion-item>
+        <ion-list *ngIf="isSection3Open">
+          <ion-item (click)="infoassiette()" class="dropdown-item">Tenez votre comptabilité</ion-item>
+          <ion-item href="declare-fiscality"  class="dropdown-item">Etablissez vos déclarations fiscales</ion-item>
+          <ion-item  (click)="closeMenu()" routerLink="Documentation"  class="dropdown-item">Préparez vos fiches de paie</ion-item>
+          <ion-item (click)="closeMenu()" routerLink="Documentation"  class="dropdown-item">Demandez un conseil</ion-item>
+        </ion-list>  
+    </ion-list>
+  </ion-content>
+  <ion-footer>
+ <!-- Ion item at the bottom -->
+ <ion-item>
+  <ion-icon slot="start" name="log-out"></ion-icon>
+  <ion-label (click)="logout()">Logout</ion-label>
+</ion-item>
+  </ion-footer>
+    
+
+

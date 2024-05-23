@@ -1,0 +1,22 @@
+<div id="loader" *ngIf="loading"></div>
+<div class="container-fluid"*ngIf="documentslist">
+  <h2 style="text-align: center;">Liste des documents</h2> 
+   <table class="table table-striped" id="tablebordered">
+            <thead>
+                <tr>
+                  <th scope="col" [style.top]="inverseOfTranslation">Titre</th>
+                  <th scope="col" [style.top]="inverseOfTranslation">Commentaire</th>
+                  <th scope="col" [style.top]="inverseOfTranslation">Document joint</th>
+                </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let doc of documentslist, let i=index">
+                    <td>{{doc.titre}}</td>
+                    <td>{{doc.commentaire}}</td>
+                    <td >
+        <a href="{{doc.ficheurl| lowercase}}" target="_blank">Aperçu document</a>
+                    </td>  
+                  </tr>
+                </tbody>
+        </table>
+</div>

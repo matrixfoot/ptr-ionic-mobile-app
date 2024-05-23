@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar>
+    <ion-title style="text-align: center;">Liste des DS non payées par utilisateur</ion-title>
+    <ion-buttons slot="end">
+      <ion-button (click)="closecopPopup()">Fermer</ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+<ion-content>
+  <table>
+    <thead>
+    <tr>
+      <th scope="col">Nature </th>
+      <th scope="col">Mois </th>
+      <th scope="col">Année </th>
+      <th scope="col">Prenom </th>
+      <th scope="col">Nom </th>
+      <th scope="col">Statut </th>
+      <th scope="col">Total honoraire HT</th>
+      <th scope="col">Date de création </th>  
+    </tr>
+    </thead>
+    <tbody>
+    <tr *ngFor="let dsnonpaye of alldsbyusernonpaye; let i = index"> 
+      <td><span *ngIf="dsnonpaye.nature">{{dsnonpaye.nature}}</span> <span *ngIf="!dsnonpaye.nature">Autre demande de service</span></td>
+      <td><span *ngIf="dsnonpaye.mois">{{dsnonpaye.mois}}</span> </td>
+      <td><span *ngIf="dsnonpaye.annee">{{dsnonpaye.annee}}</span> </td>
+      <td><span *ngIf="dsnonpaye.nature">{{filterusers2(dsnonpaye.userId)}}{{prenomfisc}}</span> <span *ngIf="!dsnonpaye.nature">{{filterusers2(dsnonpaye.clientId)}}{{prenomfisc}}</span></td>
+      <td><span *ngIf="dsnonpaye.nature">{{filterusers2(dsnonpaye.userId)}}{{nomfisc}}</span> <span *ngIf="!dsnonpaye.nature">{{filterusers2(dsnonpaye.clientId)}}{{nomfisc}}</span></td>
+      <td>
+        <span *ngIf="dsnonpaye.statutadmin">
+          <span *ngIf="dsnonpaye.statutadmin.length>0">
+            <ng-container *ngFor="let statut of dsnonpaye.statutadmin; let j = index">
+              <td  *ngIf="j==dsnonpaye.statutadmin.length-1"style="display: block;">{{statut.statut}}</td>
+            </ng-container>
+          </span> 
+        </span>           
+      </td>
+      <td>{{dsnonpaye.totalhonoraire | number:'1.3-3'| removeComma}}</td>
+      <td>{{dsnonpaye.created | customDate}}</td>
+      <td>
+<button type="button" class="btn btn-success" (click)="getNavigationautreds('view-autreds',dsnonpaye._id)"*ngIf="!dsnonpaye.nature"target="_blank">Consulter</button>
+<button type="button" class="btn btn-success" (click)="getNavigationdeccomptabilites('view-deccomptabilite',dsnonpaye._id)"*ngIf="dsnonpaye.nature==='comptabilite'"target="_blank">Consulter</button>
+<button type="button" class="btn btn-success" (click)="getNavigationdecfiscmenss('view-decfiscmens',dsnonpaye._id)"*ngIf="dsnonpaye.nature==='Déclaration Mensuelle'"target="_blank">Consulter</button>           
+</td>
+<td>
+<button type="button" class="btn btn-primary" (click)="payinvoice(dsnonpaye._id,dsnonpaye.nature)"><span><i class="fa fa-spinner" *ngIf="submitting"></i></span> Marquer payé</button>           
+</td>
+    </tr>
+    </tbody>
+  </table>
+</ion-content>

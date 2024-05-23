@@ -1,0 +1,126 @@
+<head>
+  <title>Registration Form</title>
+</head>
+<body>
+  <div class="bodycontainer">
+    <div id="loader" *ngIf="loading"></div>  
+  <div class="container-fluid" *ngIf="!loading"> 
+  <h1>Formulaire d'inscription</h1>
+  <p>Merci de remplir le formulaire avec les informations obligatoires</p>
+  <form  [formGroup]="signupForm" (ngSubmit)="onSignup()">
+    <fieldset>
+      <div style="display: flex;">
+        <label><div *ngIf="submitted && f.usertype.errors" class="invalid">
+          <div *ngIf="f.usertype.errors.required">Type Utilisateur est obligatoire</div>
+      </div>Type Utilisateur:<select  class="input-field"  placeholder="Entrer Votre Type Utilisateur"id="usertype" formControlName="usertype" name="usertype"
+      [ngClass]="{ 'is-invalid': submitted && f.usertype.errors }" >
+        <option hidden >Entrer Votre Type Utilisateur</option>
+        <option value="Clientpor">Client porteur</option>
+        <option value="Clientcomm">Client commerçant</option>
+        <option value="Metier">Métier</option>
+        <option value="Agence">Agence</option>
+        <option value="comite arbitrage">Comite Arbitrage</option>
+
+        <option disabled value="Candidat">Candidat</option>
+      </select></label>
+      <label><div *ngIf="submitted && f.lastname.errors" class="invalid">
+        <div *ngIf="f.lastname.errors.required">Nom Obligatoire</div>
+    </div><span>Nom Utilisateur:
+      <input class="input-field" type="text" placeholder="Entrer Votre Nom" id="lastname" formControlName="lastname" name="lastname" [ngClass]="{ 'is-invalid': submitted && f.lastname.errors }"></span>
+</label>
+  
+      <label><div *ngIf="submitted && f.firstname.errors" class="invalid">
+        <div *ngIf="f.firstname.errors.required">Prénom Obligatoire</div>
+    </div><span>Prénom Utilisateur:
+      <input class="input-field" type="text" placeholder="Entrer Votre Prenom" id="firstname" formControlName="firstname" name="firstname" [ngClass]="{ 'is-invalid': submitted && f.firstname.errors }"></span>
+  </label>
+      </div>
+
+
+  <label style="max-width: 50%;"><div *ngIf="submitted && f.clientcode.errors" class="invalid">
+    <div *ngIf="f.clientcode.errors.required">Veuillez générer votre code client</div>
+</div>Code Client:<div style="display: flex;"><input class="input-field" style="background-color: white;color:black" type="text" id="clientcode" [ngClass]="{ 'is-invalid': submitted && f.clientcode.errors }"formControlName="clientcode" disabled>
+  <input type="button" style="background-color: green;color:white"value="Générer code client" (click)="randomString()"></div></label>
+  
+  <label><div style="display: flex;"><span style="flex: 0.5">Indicatif:</span><span style="flex: 1">Mobile:</span><span style="flex:1">Confirmer mobile:</span></div>
+    <div style="display: flex;"><div *ngIf="submitted && f.indicatif.errors" style="flex: 0.5" class="invalid">
+    <div *ngIf="f.indicatif.errors.required">Indicatif Mobile Obligatoire </div>
+    <div *ngIf="f.indicatif.errors.pattern">Veuillez saisir un indicatif valide</div> 
+</div>
+<div *ngIf="submitted && f.mobile.errors" style="flex:1"class="invalid">
+  <div *ngIf="f.mobile.errors.required">Numéro Mobile Obligatoire</div>
+  <div *ngIf="f.mobile.errors.pattern">Veuillez saisir un numéro mobile valide</div>
+</div>
+<div *ngIf="submitted && f.confirmmobile.errors" class="invalid">
+<div *ngIf="f.confirmmobile.errors.required">Numéro Mobile Obligatoire</div>
+<div *ngIf="f.confirmmobile.errors.mustMatch">Les numéros mobiles ne sont pas identiques</div>
+<div *ngIf="f.confirmmobile.errors.pattern">Veuillez saisir un numéro mobile valide</div>
+
+</div> 
+</div>
+<div style="display: flex"><input class="input-field" style="flex: 0.5"type="text" placeholder="Indicatif pays" id="indicatif" 
+[ngClass]="{ 'is-invalid': submitted && f.indicatif.errors }"formControlName="indicatif" style="width: 100px;">
+<input class="input-field" style="flex:1"type="text" placeholder="Numéro Mobile" id="mobile" 
+[ngClass]="{ 'is-invalid': submitted && f.mobile.errors }"formControlName="mobile"> 
+<input class="input-field" style="flex:1"type="text" placeholder="Confirmez Mobile" id="confirmmobile" 
+[ngClass]="{ 'is-invalid': submitted && f.confirmmobile.errors }"formControlName="confirmmobile">
+</div> 
+</label>
+
+<label><div style="display: flex;"><span style="flex: 1">Email:</span><span style="flex: 1">Confirmer Email:</span></div>
+<div style="display: flex;"><div *ngIf="submitted && f.email.errors" class="invalid"style="flex: 1">
+  <div *ngIf="f.email.errors.required">Email Obligatoire</div>
+  <div *ngIf="f.email.errors.email">Adresse Email non valides</div>
+</div>
+<div *ngIf="submitted && f.confirmemail.errors" class="invalid"style="flex: 1">
+<div *ngIf="f.confirmemail.errors.required">Email Obligatoire</div>
+<div *ngIf="f.confirmemail.errors.email">Adresse Email non valides</div>
+<div *ngIf="f.confirmemail.errors.mustMatch">Les Emails  ne sont pas identiques</div>
+</div></div>
+<div style="display: flex"><input class="input-field" type="email" placeholder="Entrez Votre Email" id="email" 
+[ngClass]="{ 'is-invalid': submitted && f.email.errors }"formControlName="email">
+<input class="input-field" type="email" placeholder="Confirmez Votre Email" id="confirmemail" 
+[ngClass]="{ 'is-invalid': submitted && f.confirmemail.errors }"formControlName="confirmemail" required></div>
+</label>
+
+<label><div style="display: flex;"><span style="flex: 1">Mot de passe:</span><span style="flex: 1">Confirmer Mot de passe:</span></div>
+<div style="display: flex;"> <div *ngIf="submitted && f.password.errors" class="invalid"style="flex: 1">
+  <div *ngIf="f.password.errors.required">Mot de passe Obligatoire</div> 
+</div>
+<div *ngIf="submitted && f.confirmpassword.errors" class="invalid"style="flex: 1">
+<div *ngIf="f.confirmpassword.errors.required">Mot de passe Obligatoire</div>
+<div *ngIf="f.confirmpassword.errors.mustMatch">Les Mot de passe  ne sont pas identiques</div>
+</div></div>
+<div style="display: flex">
+<input class="input-field" [type]="fieldTextType ? 'text' : 'password'" placeholder="Entrez Votre Mot De Passe" id="password" 
+[ngClass]="{ 'is-invalid': submitted && f.password.errors }"formControlName="password" required>
+<span class="input-field">
+  <i
+    class="fa"
+    [ngClass]="{
+      'fa-eye-slash': !fieldTextType,
+      'fa-eye': fieldTextType
+    }"
+    (click)="toggleFieldTextType()"
+  ></i>
+</span>
+<input class="input-field" [type]="repeatFieldTextType ? 'text' : 'password'" placeholder="Confirmer Votre Mot De Passe" id="confirmpassword" 
+[ngClass]="{ 'is-invalid': submitted && f.confirmpassword.errors }"formControlName="confirmpassword" required>
+<span class="input-field">
+  <i
+    class="fa"
+    [ngClass]="{
+      'fa-eye-slash': !repeatFieldTextType,
+      'fa-eye': repeatFieldTextType
+    }"
+    (click)="togglerepeatFieldTextType()"
+  ></i>
+</span>
+</div>
+</label>
+    </fieldset>
+    <button class="btn btn-success">Inscription</button>
+    <button class="btn btn-primary" type="reset" (click)="onReset()">Réinitialiser</button>    </form>
+</div>
+</div>
+</body>

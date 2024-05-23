@@ -1,3 +1,17 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <ion-header>
+    <app-header></app-header> <!-- Include the header component -->
+  </ion-header>
+  <ion-menu contentId="main-content"menuId="menu">
+    <ion-content>
+      <app-side-menu></app-side-menu> <!-- Include the side menu component -->
+    </ion-content>
+  </ion-menu>
+  <ion-content>
+ <!-- Main content -->
+ <ion-router-outlet id="main-content"></ion-router-outlet>
+  </ion-content>
+  <ion-footer>
+    <app-footer></app-footer> <!-- Include the header component -->
+  </ion-footer>
 </ion-app>
